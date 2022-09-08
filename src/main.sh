@@ -1,17 +1,24 @@
 use std::print::log;
 
 function stream_gp_ports() {
+	export cppid=$PPID;
+	echo "$cppid" > /tmp/ppid
   function read_ports() {
-	while sleep 2 && true "! pgrep -f 'sshd: gitpod@notty' 1>/dev/null"; do {
-		gp ports list 2>/dev/null | awk 'NR>2 {print $2}'
+	  while sleep 2 && grep -q '@pts/' "/proc/$cppid/cmdline"; do {
+		lsof -P -iTCP -sTCP:LISTEN -F 'n' | grep 'n.*:' | sed 's|.*:||g'	
 	} done
   }
 
   local forwarded_ports=(22000);
+  if command -v tmux 1>/dev/null; then {
+  	local tmux=true;
+  } fi
   while read -r port; do {
           if [[ ! "${forwarded_ports[*]}" =~ (^| )${port}($| ) ]]; then {
                   forwarded_ports+=("$port");
-                  tmux display-message -t main "Port ${port} was forwarded to your client device";
+		  if test -v tmux; then {
+			tmux display-message -t main "Port ${port} was forwarded to your client device";
+		  } fi
                   printf '%s\n' "$port";
           } fi
   } done < <(read_ports)
@@ -24,9 +31,12 @@ function main() {
   local master_socket="/tmp/.gssh_$RANDOM";
 
   for i in "${!args[@]}"; do {
-    if [[ "${args[i]}" == "ssh" ]]; then {
+	if [[ "${args[i]}" == "--" ]]; then {
+		break;
+	} fi
+	  if [[ "${args[i]}" == "/usr/bin/ssh" ]] || [[ "${args[i]}" == ssh ]]; then {
      unset 'args[i]'; 
-    } elif [[ "${args[i]}" =~ [^[:space:]]+@[^[:space:]]+ ]]; then {
+    } elif test ! -v server_address && [[ "${args[i]}" =~ [^[:space:]]+@[^[:space:]]+ ]]; then {
       local server_address="${args[i]}";
       unset 'args[i]';
     } fi
@@ -34,21 +44,20 @@ function main() {
   args=("${args[@]}");
 
   if test ! -v server_address; then {
-    log::error "No server address was given!" || exit 1;
+    log::error "No server address was given!" 1 || exit 1;
   } fi
 
-  # TODO: Reconsider -C
-  local ssh_command=(
-    ssh
-    -C # For compression
-    -M -S "$master_socket"
-    -o UserKnownHostsFile=/dev/null
-    -o StrictHostKeyChecking=no
-    "${args[@]}"
-    "$server_address"
-  );
+	local ssh_command=(
+	    ssh
+		    #-C # For compression
+		    -M -S "$master_socket"
+		    -o UserKnownHostsFile=/dev/null
+		    -o StrictHostKeyChecking=no
+		    "$server_address"
+		    "${args[@]}"
+	);
 
-  # Start port watcher in the background
+# Start port watcher in the background
   (
     until sleep 2 && test -e "$master_socket"; do {
       continue;
@@ -65,7 +74,7 @@ function main() {
       printf '%s\n' "$(declare -f stream_gp_ports)" "stream_gp_ports;exit" \
         | exec ssh -T -S "$master_socket" /bin/bash
     )
-  ) & disown;
+  ) &
 
   exec "${ssh_command[@]}"
 }
