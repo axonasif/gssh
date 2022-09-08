@@ -9,7 +9,7 @@ function stream_gp_ports() {
 	} done
   }
 
-  local forwarded_ports=(22000);
+  local forwarded_ports=(22000 23000);
   if command -v tmux 1>/dev/null; then {
   	local tmux=true;
   } fi
