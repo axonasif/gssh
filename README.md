@@ -1,6 +1,6 @@
 # gssh
 
-Client side `ssh` wrapper script for auto port forwarding under ~77 SLOC. I couldn't find a solution online, so thought to put together this script for using with Gitpod's ssh-gateway. Normally, `gssh` should work for any ssh host.
+Client side `ssh` wrapper script for auto port forwarding under ~77 SLOC. I couldn't find such a script online, so thought to put this together for using with Gitpod's ssh-gateway. Normally, `gssh` should work for any ssh host.
 
 # Installation
 
