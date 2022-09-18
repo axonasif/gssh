@@ -22,6 +22,6 @@ gssh ssh 'axonasif-dotfilessh-cemin9pjf2q@axonasif-dotfilessh-cemin9pjf2q.ssh.ws
 
 Or you can manually omit the `ssh` keyword if you like, to only pass the host address, you can pass any ssh arguments as well:
 
-```
-gssh -v 'axonasif-dotfilessh-cemin9pjf2q@axonasif-dotfilessh-cemin9pjf2q.ssh.ws-us65.gitpod.io' "uname -a"
+```bash
+gssh -v 'user@host' "uname -a"
 ```
