@@ -54,7 +54,8 @@ function main() {
 	local ssh_command=(
 	    ssh
 		    #-C # For compression
-		    -M -S "$master_socket"
+		    -o ControlMaster=auto
+		    -o ControlPath="$master_socket"
 		    -o ControlPersist=10m
 		    -o UserKnownHostsFile=/dev/null
 		    -o StrictHostKeyChecking=no
