@@ -32,7 +32,7 @@ function main() {
   local args=("${@}");
   # ran_port=$(($RANDOM * $RANDOM * $RANDOM)) && ran_port="${ran_port::4}";
   # address="localhost:$ran_port";
-  local master_socket="/tmp/.gssh_sock";
+  local master_socket="/tmp/.gssh_sock.$$_$RANDOM";
 
   for i in "${!args[@]}"; do {
 	if [[ "${args[i]}" == "--" ]]; then {
@@ -54,9 +54,10 @@ function main() {
 	local ssh_command=(
 	    ssh
 		    #-C # For compression
-		    -o ControlMaster=auto
-		    -o ControlPath="$master_socket"
-		    -o ControlPersist=10m
+		    #-o ControlMaster=auto
+		    #-o ControlPath="$master_socket"
+		    #-o ControlPersist=10m
+		    -M -S "$master_socket"
 		    -o UserKnownHostsFile=/dev/null
 		    -o StrictHostKeyChecking=no
 		    "$server_address"
