@@ -6,7 +6,7 @@ function stream_gp_ports() {
 	echo "$cppid" > /tmp/ppid
   function read_ports() {
 	  while sleep 2 && grep -q '@pts/' "/proc/$cppid/cmdline"; do {
-		lsof -P -iTCP -sTCP:LISTEN -F 'n' | sed -n 's/^n\*://p';
+		lsof -P -iTCP -sTCP:LISTEN -F 'n' | sed -n 's/^n.*://p';
 	} done
   }
 
